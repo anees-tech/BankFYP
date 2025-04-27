@@ -1,0 +1,59 @@
+.transaction-history {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.transaction-history h3 {
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.transaction-list {
+  overflow-x: auto;
+}
+
+.transaction-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-list th,
+.transaction-list td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-list th {
+  background-color: var(--secondary-color);
+  font-weight: 500;
+}
+
+.transaction-list tr:last-child td {
+  border-bottom: none;
+}
+
+.transaction-type {
+  text-transform: capitalize;
+}
+
+.transaction-amount {
+  font-weight: 500;
+}
+
+tr.deposit .transaction-amount {
+  color: var(--success-color);
+}
+
+tr.withdraw .transaction-amount {
+  color: var(--error-color);
+}
+
+.no-transactions {
+  text-align: center;
+  padding: 20px;
+  color: #5f6368;
+}
