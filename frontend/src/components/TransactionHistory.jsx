@@ -1,38 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import "../styles/TransactionHistory.css"
-import { getTransactions } from "../services/transactionService"
+import { staticTransactions } from "../data/dummyData" // Import static data
 
-function TransactionHistory({ userId }) {
-  const [transactions, setTransactions] = useState([])
-  const [loading, setLoading] = useState(true)
+function TransactionHistory() {
+  const [transactions, setTransactions] = useState(staticTransactions)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    fetchTransactions()
-  }, [userId])
-
-  const fetchTransactions = async () => {
-    setLoading(true)
-    try {
-      const transactionsData = await getTransactions(userId)
-      setTransactions(transactionsData)
-    } catch (err) {
-      setError("Failed to load transaction history")
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A"
     const date = new Date(dateString)
     return date.toLocaleDateString() + " " + date.toLocaleTimeString()
-  }
-
-  if (loading && transactions.length === 0) {
-    return <div className="loading">Loading transaction history...</div>
   }
 
   if (error) {
@@ -59,6 +38,7 @@ function TransactionHistory({ userId }) {
               <th>Type</th>
               <th>Amount</th>
               <th>Balance</th>
+              <th>Description</th>
             </tr>
           </thead>
           <tbody>
@@ -70,6 +50,7 @@ function TransactionHistory({ userId }) {
                   {transaction.type === "deposit" ? "+" : "-"}${transaction.amount.toFixed(2)}
                 </td>
                 <td>${transaction.balanceAfter.toFixed(2)}</td>
+                <td>{transaction.description || "-"}</td>
               </tr>
             ))}
           </tbody>

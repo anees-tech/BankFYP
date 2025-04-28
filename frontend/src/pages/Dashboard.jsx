@@ -1,62 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import "../styles/Dashboard.css"
-import { getAccountDetails, makeTransaction } from "../services/accountService"
 import TransactionHistory from "../components/TransactionHistory"
-import TransferForm from "../components/TransferForm"
+import { staticAccountDetails } from "../data/dummyData"
 
 function Dashboard({ user }) {
-  const [account, setAccount] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [account] = useState(staticAccountDetails)
   const [error, setError] = useState("")
-  const [transactionType, setTransactionType] = useState("deposit")
-  const [amount, setAmount] = useState("")
-  const [transactionMessage, setTransactionMessage] = useState("")
-  const [activeTab, setActiveTab] = useState("transactions") // "transactions" or "transfer"
+  const [activeTab, setActiveTab] = useState("transactions")
 
-  useEffect(() => {
-    fetchAccountDetails()
-  }, [])
-
-  const fetchAccountDetails = async () => {
-    setLoading(true)
-    try {
-      const accountData = await getAccountDetails(user._id)
-      setAccount(accountData)
-    } catch (err) {
-      setError("Failed to load account details")
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleTransaction = async (e) => {
+  const handleTransaction = (e) => {
     e.preventDefault()
-    setTransactionMessage("")
-
-    if (!amount || isNaN(amount) || Number.parseFloat(amount) <= 0) {
-      setTransactionMessage("Please enter a valid amount")
-      return
-    }
-
-    try {
-      const result = await makeTransaction({
-        userId: user._id,
-        type: transactionType,
-        amount: Number.parseFloat(amount),
-      })
-
-      setTransactionMessage(`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} successful!`)
-      setAmount("")
-      fetchAccountDetails() // Refresh account details
-    } catch (err) {
-      setTransactionMessage(err.message || "Transaction failed")
-    }
+    alert("Transactions are disabled in this demo.")
   }
 
-  if (loading) return <div className="loading">Loading account details...</div>
+  const handleTransfer = (e) => {
+    e.preventDefault()
+    alert("Transfers are disabled in this demo.")
+  }
+
   if (error) return <div className="error-message">{error}</div>
 
   return (
@@ -81,65 +44,36 @@ function Dashboard({ user }) {
           className={`tab ${activeTab === "transactions" ? "active" : ""}`}
           onClick={() => setActiveTab("transactions")}
         >
-          Deposit/Withdraw
+          Deposit/Withdraw (Demo)
         </button>
         <button className={`tab ${activeTab === "transfer" ? "active" : ""}`} onClick={() => setActiveTab("transfer")}>
-          Transfer Money
+          Transfer Money (Demo)
         </button>
       </div>
 
       {activeTab === "transactions" ? (
-        <div className="transaction-section">
+        <div className="transaction-section disabled-section">
           <h3>Make a Transaction</h3>
-          {transactionMessage && (
-            <div className={transactionMessage.includes("successful") ? "success" : "error"}>{transactionMessage}</div>
-          )}
-
+          <p>This feature is disabled in the demo.</p>
           <form onSubmit={handleTransaction}>
-            <div className="transaction-type">
-              <label>
-                <input
-                  type="radio"
-                  name="transactionType"
-                  value="deposit"
-                  checked={transactionType === "deposit"}
-                  onChange={() => setTransactionType("deposit")}
-                />
-                Deposit
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="transactionType"
-                  value="withdraw"
-                  checked={transactionType === "withdraw"}
-                  onChange={() => setTransactionType("withdraw")}
-                />
-                Withdraw
-              </label>
-            </div>
-
-            <div className="amount-input">
-              <label htmlFor="amount">Amount ($)</label>
-              <input
-                type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min="0.01"
-                step="0.01"
-                required
-              />
-            </div>
-
-            <button type="submit">Submit</button>
+            <button type="submit" disabled>
+              Submit
+            </button>
           </form>
         </div>
       ) : (
-        <TransferForm userId={user._id} onTransferComplete={fetchAccountDetails} />
+        <div className="transfer-form disabled-section">
+          <h3>Transfer Money</h3>
+          <p>This feature is disabled in the demo.</p>
+          <form onSubmit={handleTransfer}>
+            <button type="submit" disabled>
+              Transfer Funds
+            </button>
+          </form>
+        </div>
       )}
 
-      <TransactionHistory userId={user._id} />
+      <TransactionHistory />
     </div>
   )
 }

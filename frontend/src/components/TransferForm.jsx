@@ -3,14 +3,13 @@
 import { useState } from "react"
 import "../styles/TransferForm.css"
 
-function TransferForm({ userId, onTransferComplete }) {
+function TransferForm() {
   const [formData, setFormData] = useState({
     recipientAccountNumber: "",
     amount: "",
     description: "",
   })
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ text: "", type: "" })
+  const [message, setMessage] = useState({ text: "Transfers are disabled in this demo.", type: "info" })
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -20,57 +19,13 @@ function TransferForm({ userId, onTransferComplete }) {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    setMessage({ text: "", type: "" })
-    setLoading(true)
-
-    try {
-      const response = await fetch("http://localhost:5000/api/transactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          type: "transfer",
-          amount: Number(formData.amount),
-          recipientAccountNumber: formData.recipientAccountNumber,
-          description: formData.description,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "Transfer failed")
-      }
-
-      setMessage({
-        text: "Transfer successful!",
-        type: "success",
-      })
-      setFormData({
-        recipientAccountNumber: "",
-        amount: "",
-        description: "",
-      })
-
-      if (onTransferComplete) {
-        onTransferComplete()
-      }
-    } catch (error) {
-      setMessage({
-        text: error.message || "Transfer failed. Please try again.",
-        type: "error",
-      })
-    } finally {
-      setLoading(false)
-    }
+    alert("Transfers are disabled in this demo.")
   }
 
   return (
-    <div className="transfer-form">
+    <div className="transfer-form disabled-section">
       <h3>Transfer Money</h3>
 
       {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
@@ -85,6 +40,7 @@ function TransferForm({ userId, onTransferComplete }) {
             value={formData.recipientAccountNumber}
             onChange={handleChange}
             required
+            disabled
           />
         </div>
 
@@ -99,6 +55,7 @@ function TransferForm({ userId, onTransferComplete }) {
             min="0.01"
             step="0.01"
             required
+            disabled
           />
         </div>
 
@@ -111,11 +68,12 @@ function TransferForm({ userId, onTransferComplete }) {
             value={formData.description}
             onChange={handleChange}
             placeholder="What's this transfer for?"
+            disabled
           />
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Processing..." : "Transfer Funds"}
+        <button type="submit" disabled>
+          Transfer Funds
         </button>
       </form>
     </div>

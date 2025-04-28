@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import "../styles/AdminDashboard.css"
-import { getAllUsers, createUser, updateUser, deleteUser } from "../services/userService"
 import UserList from "../components/UserList"
 import UserForm from "../components/UserForm"
 import AllTransactions from "../components/AllTransactions"
+import { dummyUsers } from "../data/dummyData" // Import dummy data
 
 function AdminDashboard({ user }) {
   const [users, setUsers] = useState([])
@@ -14,7 +14,6 @@ function AdminDashboard({ user }) {
   const [selectedUser, setSelectedUser] = useState(null)
   const [isFormVisible, setIsFormVisible] = useState(false)
   const [formMode, setFormMode] = useState("create") // 'create' or 'edit'
-  const [showModal, setShowModal] = useState(false)
   const [activeTab, setActiveTab] = useState("users") // 'users' or 'transactions'
 
   useEffect(() => {
@@ -23,11 +22,12 @@ function AdminDashboard({ user }) {
 
   const fetchUsers = async () => {
     setLoading(true)
+    setError("")
+    await new Promise((resolve) => setTimeout(resolve, 400))
     try {
-      const usersData = await getAllUsers()
-      setUsers(usersData)
+      setUsers([...dummyUsers])
     } catch (err) {
-      setError("Failed to load users")
+      setError("Failed to load dummy users")
       console.error(err)
     } finally {
       setLoading(false)
@@ -40,41 +40,70 @@ function AdminDashboard({ user }) {
     setIsFormVisible(true)
   }
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user)
+  const handleEditUser = (userToEdit) => {
+    setSelectedUser(userToEdit)
     setFormMode("edit")
     setIsFormVisible(true)
   }
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (userIdToDelete) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
+      await new Promise((resolve) => setTimeout(resolve, 300))
       try {
-        await deleteUser(userId)
-        fetchUsers() // Refresh the list
+        const userIndex = dummyUsers.findIndex((u) => u._id === userIdToDelete)
+        if (userIndex > -1) {
+          dummyUsers.splice(userIndex, 1)
+        } else {
+          throw new Error("User not found in dummy data")
+        }
+        fetchUsers()
       } catch (err) {
-        setError("Failed to delete user")
+        setError("Failed to delete dummy user")
         console.error(err)
       }
     }
   }
 
   const handleFormSubmit = async (userData) => {
+    await new Promise((resolve) => setTimeout(resolve, 500))
     try {
       if (formMode === "create") {
-        await createUser(userData)
+        const newUser = {
+          ...userData,
+          _id: `user_dummy_${Date.now()}`,
+          accountNumber: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
+          balance: userData.initialBalance || 0,
+          createdAt: new Date().toISOString(),
+        }
+        delete newUser.password
+        dummyUsers.push(newUser)
       } else {
-        await updateUser(selectedUser._id, userData)
+        const userIndex = dummyUsers.findIndex((u) => u._id === selectedUser._id)
+        if (userIndex > -1) {
+          const updatedUser = {
+            ...dummyUsers[userIndex],
+            ...userData,
+            balance: userData.initialBalance,
+          }
+          if (!userData.password) {
+            delete updatedUser.password
+          }
+          dummyUsers[userIndex] = updatedUser
+        } else {
+          throw new Error("User not found in dummy data for update")
+        }
       }
       setIsFormVisible(false)
-      fetchUsers() // Refresh the list
+      fetchUsers()
     } catch (err) {
-      setError(`Failed to ${formMode} user`)
+      setError(`Failed to ${formMode} dummy user`)
       console.error(err)
     }
   }
 
   const handleFormCancel = () => {
     setIsFormVisible(false)
+    setSelectedUser(null)
   }
 
   if (loading && users.length === 0) return <div className="loading">Loading users...</div>
