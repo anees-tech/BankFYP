@@ -5,7 +5,12 @@ import "../styles/AdminDashboard.css"
 import UserList from "../components/UserList"
 import UserForm from "../components/UserForm"
 import AllTransactions from "../components/AllTransactions"
-import { dummyUsers } from "../data/dummyData" // Import dummy data
+import {
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../services/userService"
 
 function AdminDashboard({ user }) {
   const [users, setUsers] = useState([])
@@ -23,11 +28,11 @@ function AdminDashboard({ user }) {
   const fetchUsers = async () => {
     setLoading(true)
     setError("")
-    await new Promise((resolve) => setTimeout(resolve, 400))
     try {
-      setUsers([...dummyUsers])
+      const fetchedUsers = await getAllUsers()
+      setUsers(fetchedUsers)
     } catch (err) {
-      setError("Failed to load dummy users")
+      setError(err.message || "Failed to load users")
       console.error(err)
     } finally {
       setLoading(false)
@@ -48,56 +53,33 @@ function AdminDashboard({ user }) {
 
   const handleDeleteUser = async (userIdToDelete) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      await new Promise((resolve) => setTimeout(resolve, 300))
       try {
-        const userIndex = dummyUsers.findIndex((u) => u._id === userIdToDelete)
-        if (userIndex > -1) {
-          dummyUsers.splice(userIndex, 1)
-        } else {
-          throw new Error("User not found in dummy data")
-        }
-        fetchUsers()
+        await deleteUser(userIdToDelete)
+        fetchUsers() // Refresh the list
       } catch (err) {
-        setError("Failed to delete dummy user")
+        setError(err.message || "Failed to delete user")
         console.error(err)
       }
     }
   }
 
   const handleFormSubmit = async (userData) => {
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    setLoading(true)
+    setError("")
     try {
       if (formMode === "create") {
-        const newUser = {
-          ...userData,
-          _id: `user_dummy_${Date.now()}`,
-          accountNumber: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-          balance: userData.initialBalance || 0,
-          createdAt: new Date().toISOString(),
-        }
-        delete newUser.password
-        dummyUsers.push(newUser)
+        await createUser(userData)
       } else {
-        const userIndex = dummyUsers.findIndex((u) => u._id === selectedUser._id)
-        if (userIndex > -1) {
-          const updatedUser = {
-            ...dummyUsers[userIndex],
-            ...userData,
-            balance: userData.initialBalance,
-          }
-          if (!userData.password) {
-            delete updatedUser.password
-          }
-          dummyUsers[userIndex] = updatedUser
-        } else {
-          throw new Error("User not found in dummy data for update")
-        }
+        await updateUser(selectedUser._id, userData)
       }
       setIsFormVisible(false)
-      fetchUsers()
+      setSelectedUser(null)
+      fetchUsers() // Refresh the list
     } catch (err) {
-      setError(`Failed to ${formMode} dummy user`)
+      setError(err.message || `Failed to ${formMode} user`)
       console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 

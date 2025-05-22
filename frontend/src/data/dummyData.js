@@ -43,8 +43,8 @@ export const staticTransactions = [
     _id: "stat_txn1",
     userId: "user_generic", // Placeholder ID
     type: "deposit",
-    amount: 500,
-    balanceAfter: 2500.75,
+    amount: 5014125120,
+    balanceAfter: 2525412500.75,
     date: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
     description: "Salary Deposit",
   },

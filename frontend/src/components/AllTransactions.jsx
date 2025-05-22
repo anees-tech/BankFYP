@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react"
 import "../styles/AllTransactions.css"
-import { staticTransactions, dummyUsers } from "../data/dummyData"
+import { getAllTransactions } from "../services/transactionService"
 
 function AllTransactions() {
   const [transactions, setTransactions] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [filters, setFilters] = useState({
+    userId: "",
     type: "",
     startDate: "",
     endDate: "",
@@ -16,26 +17,24 @@ function AllTransactions() {
 
   const [originalTransactions, setOriginalTransactions] = useState([])
 
-  useEffect(() => {
+  const fetchAllTransactions = async (currentFilters) => {
     setLoading(true)
+    setError("")
     try {
-      const populatedTransactions = staticTransactions.map((txn) => {
-        const recipient = dummyUsers.find((u) => u.accountNumber === txn.recipientAccountNumber)
-        return {
-          ...txn,
-          userIdDisplay: { name: "Generic User", accountNumber: "N/A" },
-          recipientDisplay: recipient ? { name: recipient.name, accountNumber: recipient.accountNumber } : null,
-        }
-      })
-
-      setOriginalTransactions(populatedTransactions)
-      applyFilters(populatedTransactions, filters)
+      const data = await getAllTransactions(currentFilters)
+      setOriginalTransactions(data)
+      applyFilters(data, currentFilters)
     } catch (err) {
-      setError("Failed to process static transactions")
-      console.error(err)
+      setError(err.message || "Failed to fetch transactions.")
+      setTransactions([])
+      setOriginalTransactions([])
     } finally {
       setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    fetchAllTransactions(filters)
   }, [])
 
   const applyFilters = (dataToFilter, currentFilters) => {
@@ -66,7 +65,7 @@ function AllTransactions() {
 
   const handleFilterSubmit = (e) => {
     e.preventDefault()
-    applyFilters(originalTransactions, filters)
+    fetchAllTransactions(filters)
   }
 
   const formatDate = (dateString) => {
@@ -76,10 +75,13 @@ function AllTransactions() {
   }
 
   const getTransactionDescription = (transaction) => {
-    const { type, description, recipientDisplay } = transaction
+    const { type, description, recipientId, userId } = transaction
     if (description) return description
     if (type === "transfer") {
-      return `Transfer to ${recipientDisplay?.accountNumber || "Unknown"}`
+      if (transaction.userId && transaction.recipientId) {
+        return `Transfer from ${transaction.userId.name || transaction.userId.username} to ${transaction.recipientId.name || transaction.recipientId.username}`
+      }
+      return "Transfer"
     }
     return type.charAt(0).toUpperCase() + type.slice(1)
   }
@@ -137,7 +139,8 @@ function AllTransactions() {
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Account</th>
+                <th>Account Holder</th>
+                <th>Account Number</th>
                 <th>Type</th>
                 <th>Description</th>
                 <th>Amount</th>
@@ -148,11 +151,12 @@ function AllTransactions() {
               {transactions.map((transaction) => (
                 <tr key={transaction._id} className={transaction.type}>
                   <td>{formatDate(transaction.date)}</td>
-                  <td>{transaction.userIdDisplay.name}</td>
+                  <td>{transaction.userId?.name || transaction.userId?.username || "N/A"}</td>
+                  <td>{transaction.userId?.accountNumber || "N/A"}</td>
                   <td className="transaction-type">{transaction.type}</td>
                   <td>{getTransactionDescription(transaction)}</td>
                   <td className="transaction-amount">
-                    {transaction.type === "deposit" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                    ${transaction.amount.toFixed(2)}
                   </td>
                   <td>${transaction.balanceAfter.toFixed(2)}</td>
                 </tr>

@@ -1,79 +1,51 @@
-const API_URL = "http://localhost:5000/api"
+const BASE_API_URL = "http://localhost:5000/api"; // Your backend API base URL
 
 export const getAllUsers = async () => {
-  try {
-    const response = await fetch(`${API_URL}/users`)
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to fetch users")
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error("Users fetch error:", error)
-    throw error
+  const response = await fetch(`${BASE_API_URL}/users`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch users");
   }
-}
+  return response.json();
+};
 
 export const createUser = async (userData) => {
-  try {
-    const response = await fetch(`${API_URL}/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to create user")
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error("User creation error:", error)
-    throw error
+  const response = await fetch(`${BASE_API_URL}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+  if (!response.ok) { 
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create user");
   }
-}
+  return response.json();
+};
 
 export const updateUser = async (userId, userData) => {
-  try {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to update user")
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error("User update error:", error)
-    throw error
+  const response = await fetch(`${BASE_API_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update user");
   }
-}
+  return response.json();
+};
 
 export const deleteUser = async (userId) => {
-  try {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: "DELETE",
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to delete user")
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error("User deletion error:", error)
-    throw error
+  const response = await fetch(`${BASE_API_URL}/users/${userId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to delete user");
   }
-}
+  return response.json();
+};
