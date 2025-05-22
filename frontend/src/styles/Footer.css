@@ -1,0 +1,27 @@
+.app-footer {
+  background-color: #f8f9fa; /* Light grey background */
+  color: #6c757d; /* Muted text color */
+  padding: 1.5rem 1rem; /* Vertical and horizontal padding */
+  margin-top: 2rem; /* Space above the footer */
+  border-top: 1px solid #e7e7e7; /* Subtle top border */
+  text-align: center; /* Center the content */
+  font-size: 0.9rem; /* Slightly smaller font size */
+}
+
+.footer-content p {
+  margin: 0; /* Remove default paragraph margin */
+}
+
+.footer-content nav {
+  margin-top: 0.5rem; /* Space between copyright and links */
+}
+
+.footer-content nav a {
+  color: #007bff; /* Link color */
+  text-decoration: none;
+  margin: 0 0.5rem; /* Space around links */
+}
+
+.footer-content nav a:hover {
+  text-decoration: underline;
+}

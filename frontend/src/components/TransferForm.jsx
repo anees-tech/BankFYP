@@ -2,14 +2,16 @@
 
 import { useState } from "react"
 import "../styles/TransferForm.css"
+import { makeTransaction } from "../services/accountService" // Import makeTransaction
 
-function TransferForm() {
+function TransferForm({ userId, onTransactionSuccess }) { // Add props
   const [formData, setFormData] = useState({
     recipientAccountNumber: "",
     amount: "",
     description: "",
   })
-  const [message, setMessage] = useState({ text: "Transfers are disabled in this demo.", type: "info" })
+  const [message, setMessage] = useState({ text: "", type: "" }) // Clear initial message
+  const [loading, setLoading] = useState(false) // Add loading state
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -19,13 +21,40 @@ function TransferForm() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    alert("Transfers are disabled in this demo.")
+    setMessage({ text: "", type: "" })
+    setLoading(true)
+
+    if (!formData.recipientAccountNumber || !formData.amount || parseFloat(formData.amount) <= 0) {
+      setMessage({ text: "Please fill in all required fields with valid values.", type: "error" })
+      setLoading(false)
+      return
+    }
+
+    try {
+      const transactionData = {
+        userId, // Pass the logged-in user's ID
+        type: "transfer",
+        amount: parseFloat(formData.amount),
+        recipientAccountNumber: formData.recipientAccountNumber,
+        description: formData.description,
+      }
+      const result = await makeTransaction(transactionData)
+      setMessage({ text: result.message || "Transfer successful!", type: "success" })
+      setFormData({ recipientAccountNumber: "", amount: "", description: "" }) // Reset form
+      if (onTransactionSuccess) {
+        onTransactionSuccess() // Callback to refresh dashboard data
+      }
+    } catch (error) {
+      setMessage({ text: error.message || "Transfer failed.", type: "error" })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="transfer-form disabled-section">
+    <div className="transfer-form"> {/* Remove disabled-section if not needed globally */}
       <h3>Transfer Money</h3>
 
       {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
@@ -40,7 +69,7 @@ function TransferForm() {
             value={formData.recipientAccountNumber}
             onChange={handleChange}
             required
-            disabled
+            placeholder="Enter recipient's account number"
           />
         </div>
 
@@ -55,7 +84,7 @@ function TransferForm() {
             min="0.01"
             step="0.01"
             required
-            disabled
+            placeholder="Enter amount to transfer"
           />
         </div>
 
@@ -68,12 +97,11 @@ function TransferForm() {
             value={formData.description}
             onChange={handleChange}
             placeholder="What's this transfer for?"
-            disabled
           />
         </div>
 
-        <button type="submit" disabled>
-          Transfer Funds
+        <button type="submit" disabled={loading}> {/* Enable button, manage with loading state */}
+          {loading ? "Processing..." : "Transfer Funds"}
         </button>
       </form>
     </div>

@@ -5,6 +5,7 @@ import "./App.css"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import AdminDashboard from "./pages/AdminDashboard"
+import Footer from "./components/Footer"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -44,6 +45,7 @@ function App() {
       </main>
 
       <footer>
+        <Footer/>
         <p>&copy; 2025 Bank Management System</p>
       </footer>
     </div>
