@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import "../styles/Login.css"
 import { loginUser } from "../services/authService"
 
@@ -11,6 +12,7 @@ function Login({ setUser }) {
   })
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -29,6 +31,7 @@ function Login({ setUser }) {
       const userData = await loginUser(formData)
       localStorage.setItem("user", JSON.stringify(userData))
       setUser(userData)
+      navigate('/dashboard')
     } catch (err) {
       setError(err.message || "Login failed. Please try again.")
     } finally {
@@ -41,7 +44,7 @@ function Login({ setUser }) {
       <div className="login-card">
         <h2>Login to Your Account</h2>
 
-        {error && <div className="error">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -72,6 +75,13 @@ function Login({ setUser }) {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <div className="register-link">
+          <p>Don't have an account?</p>
+          <Link to="/register" className="link-button">
+            Create one now
+          </Link>
+        </div>
       </div>
     </div>
   )

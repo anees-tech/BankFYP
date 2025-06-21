@@ -33,17 +33,32 @@ export const getUserById = async (req, res, next) => {
 // Create a new user
 export const createUser = async (req, res, next) => {
   try {
-    const { name, username, email, password, role, initialBalance } = req.body
+    const {
+      // Core
+      name, username, email, password, role, initialBalance,
+      // Step 1
+      fatherName, dob, gender, maritalStatus, currentAddress, city, state, pinCode, mobileNumber,
+      // Step 2
+      cnic, religion, category, educationalQualification, sourceOfIncome, 
+      companyName, monthlySalary, businessName, ntn,
+      nomineeName, nomineeRelation, nomineeCNIC, bloodGroup, medicalConditions,
+      // Step 3
+      accountType, servicesRequired
+    } = req.body
 
-    // Check if username or email already exists
-    const existingUser = await User.findOne({
-      $or: [{ username }, { email }],
-    })
+    // Check if username, email, or CNIC already exists
+    const orConditions = [{ username }, { email }];
+    if (cnic) {
+      orConditions.push({ cnic });
+    }
+    const existingUser = await User.findOne({ $or: orConditions });
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "Username or email already exists",
-      })
+      let message = "User already exists.";
+      if (existingUser.username === username) message = "Username already exists.";
+      if (existingUser.email === email) message = "Email already exists.";
+      if (cnic && existingUser.cnic === cnic) message = "CNIC already registered.";
+      return res.status(400).json({ message });
     }
 
     // Generate a unique account number
@@ -60,13 +75,17 @@ export const createUser = async (req, res, next) => {
 
     // Create new user
     const newUser = new User({
-      name,
-      username,
-      email,
-      password, // In a real app, this would be hashed
-      role,
-      accountNumber,
+      // Core
+      name, username, email, password, role, accountNumber,
       balance: initialBalance || 0,
+      // Step 1
+      fatherName, dob, gender, maritalStatus, currentAddress, city, state, pinCode, mobileNumber,
+      // Step 2
+      cnic, religion, category, educationalQualification, sourceOfIncome,
+      companyName, monthlySalary, businessName, ntn,
+      nomineeName, nomineeRelation, nomineeCNIC, bloodGroup, medicalConditions,
+      // Step 3
+      accountType, servicesRequired
     })
 
     const savedUser = await newUser.save()
@@ -91,7 +110,18 @@ export const createUser = async (req, res, next) => {
 // Update user
 export const updateUser = async (req, res, next) => {
   try {
-    const { name, username, email, password, role, initialBalance } = req.body
+    const {
+      // Core
+      name, username, email, password, role, initialBalance,
+      // Step 1
+      fatherName, dob, gender, maritalStatus, currentAddress, city, state, pinCode, mobileNumber,
+      // Step 2
+      cnic, religion, category, educationalQualification, sourceOfIncome,
+      companyName, monthlySalary, businessName, ntn,
+      nomineeName, nomineeRelation, nomineeCNIC, bloodGroup, medicalConditions,
+      // Step 3
+      accountType, servicesRequired
+    } = req.body
     const userId = req.params.id
 
     // Check if username or email already exists for another user
@@ -122,6 +152,16 @@ export const updateUser = async (req, res, next) => {
     if (password) user.password = password // In a real app, this would be hashed
     if (role) user.role = role
     if (initialBalance !== undefined) user.balance = initialBalance
+
+    // Update new fields
+    Object.assign(user, {
+      fatherName, dob, gender, maritalStatus, currentAddress, city, state, pinCode, mobileNumber,
+      cnic, religion, category, educationalQualification, sourceOfIncome,
+      companyName, monthlySalary, businessName, ntn,
+      nomineeName, nomineeRelation, nomineeCNIC, bloodGroup, medicalConditions,
+      accountType, servicesRequired
+    });
+
 
     const updatedUser = await user.save()
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import "../styles/AdminDashboard.css"
 import UserList from "../components/UserList"
-import UserForm from "../components/UserForm"
+import MultiStepUserForm from "../components/MultiStepUserForm" // Import new form
 import AllTransactions from "../components/AllTransactions"
 import {
   getAllUsers,
@@ -112,15 +112,19 @@ function AdminDashboard({ user }) {
 
       {error && <div className="error-message">{error}</div>}
 
-      {activeTab === "users" ? (
-        isFormVisible ? (
-          <UserForm mode={formMode} user={selectedUser} onSubmit={handleFormSubmit} onCancel={handleFormCancel} />
-        ) : (
-          <UserList users={users} onEdit={handleEditUser} onDelete={handleDeleteUser} />
-        )
-      ) : (
-        <AllTransactions />
+      {activeTab === "users" && !isFormVisible && (
+        <UserList users={users} onEdit={handleEditUser} onDelete={handleDeleteUser} />
       )}
+
+      {activeTab === "transactions" && <AllTransactions />}
+
+      <MultiStepUserForm
+        isOpen={isFormVisible}
+        mode={formMode}
+        user={selectedUser}
+        onSubmit={handleFormSubmit}
+        onClose={handleFormCancel}
+      />
     </div>
   )
 }
